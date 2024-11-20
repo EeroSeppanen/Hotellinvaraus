@@ -1,13 +1,13 @@
-//Hotellin varauskalenteri
-// Eero Sepp?nen
+ï»¿//Hotellin varauskalenteri
+// Eero SeppÃ¤nen
 
 //4-5p
 //input check kaikkialla
-//1 tai 2 henkil?n huoneiden varaus
-//satunnainen ja itse p??tetty varaus nimell?
-//nimell? ja varausnumerolla huoneiden haku
+//1 tai 2 henkilÃ¶n huoneiden varaus
+//satunnainen ja itse pÃ¤Ã¤tetty varaus nimellÃ¤
+//nimellÃ¤ ja varausnumerolla huoneiden haku
 //40-300 huonetta. hinta ja alennus toiminnot
-//Ominaisuus, ett? voi liikkua ajassa eteenp?in
+//Ominaisuus, ettÃ¤ voi liikkua ajassa eteenpÃ¤in
 #include<iostream>
 #include<vector>
 #include<string>
@@ -31,7 +31,7 @@ public:
 	double hinta;
 	int varausAika;
 
-	Huone(int nro, int koko = 1) : huoneNro(nro), koko(koko), varattu(false), varausnumero(0), hinta(150.0), varaaja(" "), varausAika(0) {}
+	Huone(int nro, int koko = 1, double hinta = 100.0) : huoneNro(nro), koko(koko), varattu(false), varausnumero(0), hinta(hinta), varaaja("-"), varausAika(0) {}
 
 	float Hinta(int yomaara) 	//Lasekee huoneen hinnan ja alennuksen
 	{
@@ -40,7 +40,7 @@ public:
 		{
 			hinta = 100.0 * alePros * yomaara;
 			cout << "\n----------------------------------------------------------------------------";
-			cout << "\nAlennusta tuli: " << (1 - alePros) * 100 << "e ja loppuhinnaksi tuli: " << hinta;
+			cout << "\nAlennusta tuli: " << (1 - alePros) * 100 << "% ja loppuhinnaksi tuli: " << hinta;
 			cout << "\n----------------------------------------------------------------------------";
 			return hinta;
 		}
@@ -48,7 +48,7 @@ public:
 		{
 			hinta = 150.0 * alePros * yomaara;
 			cout << "\n----------------------------------------------------------------------------";
-			cout << "\nAlennusta tuli: " << (1 - alePros) * 100 << "e ja loppuhinnaksi tuli: " << hinta;
+			cout << "\nAlennusta tuli: " << (1 - alePros) * 100 << "% ja loppuhinnaksi tuli: " << hinta;
 			cout << "\n----------------------------------------------------------------------------";
 			return hinta;
 		}
@@ -62,7 +62,7 @@ public:
 	{
 		return varattu;
 	}
-	void saveData(ofstream& outFile) 	//Tallentaa datan CSV:nä
+	void saveData(ofstream& outFile) 	//Tallentaa datan CSV:nÃ¤
 	{
 		outFile << huoneNro << "," << varaaja << "," << varattu << "," << koko << "," << varausnumero << "," << hinta << "," << varausAika << endl;
 	}
@@ -76,8 +76,8 @@ public:
 
 		while (getline(inFile, line))		//CSV lukija
 		{
-			istringstream s(line);  //stringstream rivist?
-			string field;	//kentt?
+			istringstream s(line);  //stringstream rivistï¿½
+			string field;	//kenttï¿½
 			//pilkku jakajana lukee rivin tiedot
 			getline(s, field, ',');
 			nro = stoi(field);
@@ -93,7 +93,7 @@ public:
 			getline(s, field, ',');
 			varausAika = stoi(field);
 			//luo huoneen luetuilla arvoilla
-			Huone huone(nro, koko);
+			Huone huone(nro, koko, hinta);
 			huone.varaaja = varaaja;
 			huone.varattu = varattu;
 			huone.varausnumero = varausnumero;
@@ -108,53 +108,32 @@ public:
 		else cout << "\ntiedot ladattiin onnistuneesti!";
 	}
 };
-
-char liikeInput()
-{
-	bool virhe;
-	char liike;
-	do
-	{
-		virhe = false;
-		cout << "\n---------------------------------------------------------------------------------------------------";
-		cout << "\nMitä haluat tehdä? (v = varaa huone) (n = nimihaku) (h = nrohaku) (p = poistu) (s = seuraava päivä)";
-		cout << "\n---------------------------------------------------------------------------------------------------\n";
-		cin >> liike;
-		liike = tolower(liike);		//muuttaa pieneksi kirjaimeksi
-
-		if (cin.fail() || liike != 'v' && liike != 'n' && liike != 'h' && liike != 'p' && liike != 's') 	//tarkistaa onko sy?te v n h p s
-		{
-			cout << "syötä v, n, h, p tai s\n";
-			virhe = true;
-			cin.clear();
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
-		}
-
-	} while (virhe);
-	return liike;
-}
-void uusiPaiva(vector<Huone>& huoneet) //Vapauttaa varaukset, jos ei ole enää päiviä jäljellä
+void uusiPaiva(vector<Huone>& huoneet) //Vapauttaa varaukset, jos ei ole enÃ¤Ã¤ pÃ¤iviÃ¤ jÃ¤ljellÃ¤
 {
 	for (Huone& huone : huoneet)
 	{
-		if (huone.varausAika > 0)
+		if (huone.varausAika > 0) // -1 pÃ¤iviÃ¤ varattuihin huoneisiin
 		{
 			huone.varausAika -= 1;
-		}
-		else if (huone.varausAika == 0)
-		{
-			huone.varattu = false;
-			huone.varaaja = " ";
-			huone.varausnumero = 0;
-		}
-		else
-		{
-			cout << "odottamaton virhe. Varausaika -lukuinen";
+			if (huone.varausAika == 0) //jo sei pÃ¤iviÃ¤ jÃ¤ljellÃ¤ niin huone vapautetaan
+			{
+				huone.varattu = false;
+				huone.varaaja = "-";
+				huone.varausnumero = 0;
+				if (huone.koko == 1)
+				{
+					huone.hinta = 100.0;
+				}
+				else
+				{
+					huone.hinta = 150.0;
+				}
+			}
 		}
 	}
-	cout << "\nUusi päivä aloitettu!";
+	cout << "\nUusi pÃ¤ivÃ¤ aloitettu!";
 }
-int nroInputCheck(int eka, int vika, string teksti) //Tarkistaa syötteen halutulla numerovälillä
+int nroInputCheck(int eka, int vika, string teksti) //Tarkistaa syÃ¶tteen halutulla numerovÃ¤lillÃ¤
 {
 	int vastaus;
 	bool virhe;
@@ -180,12 +159,12 @@ string stringCheck()
 	do
 	{
 		virhe = false;
-		cin.ignore(numeric_limits<streamsize>::max(), '\n'); //tyhjent?? sy?tt?puskuiri t?ss? vaiheessa, koska muuten koodi antaa virheen ja kysyy uudelleen ennen sy?tett? jostain syyst?
+		cin.ignore(numeric_limits<streamsize>::max(), '\n'); //tyhjentï¿½ï¿½ syï¿½ttï¿½puskuiri tï¿½ssï¿½ vaiheessa, koska muuten koodi antaa virheen ja kysyy uudelleen ennen syï¿½tettï¿½ jostain syystï¿½
 		getline(cin, teksti);
 
 		if (teksti.empty())
 		{
-			cout << "Nimi ei voi olla tyhjä!\n";
+			cout << "Nimi ei voi olla tyhjÃ¤!\n";
 			virhe = true;
 			cin.clear();
 		}
@@ -201,13 +180,13 @@ void varaaHuone(int huoneMaara, vector<Huone>& huoneet) // huoneen varaus funkti
 	bool virhe = false, ok = false;
 	float hinta;
 	cout << "\n---------------------------------------------------------------";
-	cout << "\nKuinka monen henkilön huoneen haluat varata? Syötä (1) tai (2): ";
-	cout << "\nPääset takaisin alkuvalikkoon syöttämällä (3)";
+	cout << "\nKuinka monen henkilÃ¶n huoneen haluat varata? SyÃ¶tÃ¤ (1) tai (2): ";
+	cout << "\nPÃ¤Ã¤set takaisin alkuvalikkoon syÃ¶ttÃ¤mÃ¤llÃ¤ (3)";
 	cout << "\n---------------------------------------------------------------\n";
-	hloMaara = nroInputCheck(1, 3, "Syötä 1, 2 tai 3");
+	hloMaara = nroInputCheck(1, 3, "SyÃ¶tÃ¤ 1, 2 tai 3");
 	if (hloMaara == 3)return;
 
-	for (Huone huone : huoneet)	//laskee vapaiden 1 tai 2 henkil?n huoneiden m??r?n
+	for (Huone huone : huoneet)	//laskee vapaiden 1 tai 2 henkilï¿½n huoneiden mï¿½ï¿½rï¿½n
 	{
 		if (!huone.varattu && huone.koko == hloMaara)
 		{
@@ -222,15 +201,15 @@ void varaaHuone(int huoneMaara, vector<Huone>& huoneet) // huoneen varaus funkti
 	else
 	{
 		cout << "\n------------------------------------------------------------------------------------------------";
-		cout << "\nVapaana on " << vapaana << " " << hloMaara << " henkilön huonetta";
+		cout << "\nVapaana on " << vapaana << " " << hloMaara << " henkilÃ¶n huonetta";
 		cout << "\nHaluatko listan vapaista huoneista ja varata numerolla? (1) vai haluatko satunnaisen huoneen (2)";
-		cout << "\nPääset takaisin alkuvalikkoon syöttämällä (3)";
+		cout << "\nPÃ¤Ã¤set takaisin alkuvalikkoon syÃ¶ttÃ¤mÃ¤llÃ¤ (3)";
 		cout << "\n------------------------------------------------------------------------------------------------\n";
-		varaustyyppi = nroInputCheck(1, 3, "Syötä 1, 2 tai 3");
+		varaustyyppi = nroInputCheck(1, 3, "SyÃ¶tÃ¤ 1, 2 tai 3");
 
 		if (varaustyyppi == 3) return;
 
-		if (varaustyyppi == 1) //oma valinta varaus
+		if (varaustyyppi == 1) //oma valinta varaus----------------------------------------------------------------------
 		{
 
 			for (int i = 0; i < huoneMaara; i++)
@@ -251,35 +230,22 @@ void varaaHuone(int huoneMaara, vector<Huone>& huoneet) // huoneen varaus funkti
 
 				if (huoneNro < 1 || huoneNro > huoneMaara || huoneet[huoneNro - 1].onkoVarattu() || huoneet[huoneNro - 1].koko != hloMaara)
 				{
-					cout << "Syötä huone jota ei ole varattu ja on halutun kokoinen\n";
+					cout << "SyÃ¶tÃ¤ huone jota ei ole varattu ja on halutun kokoinen\n";
 					cin.clear();
 					cin.ignore(numeric_limits<streamsize>::max(), '\n');
 					virhe = true;
 				}
 			} while (virhe);
-			//tarkistaa onko varaaja kelpoollinen ja tarkistaa onko nimi kirjoitettu oikein
-			do
-			{
-				cout << "\n--------------------";
-				cout << "\nSyötä varaajan nimi: ";
-				cout << "\n--------------------\n";
-				varaaja = stringCheck();
-				cout << "\n----------------------------------------------------------------";
-				cout << "\nSyötit: " << varaaja << ", Onko tämä oikein? Kyllä (1) Ei (2)";
-				cout << "\n----------------------------------------------------------------\n";
-				jatka = nroInputCheck(1, 2, "Syötä 1 tai 2");
-				if (jatka == 1) {
-					ok = true;
-				}
-				else {
-					ok = false;
-				}
 
-			} while (!ok);
+			cout << "\n--------------------";
+			cout << "\nSyÃ¶tÃ¤ varaajan nimi: ";
+			cout << "\n--------------------\n";
+			varaaja = stringCheck();
+	
 			cout << "\n-------------------------------------------";
-			cout << "\nSyötä moneksiko yöksi huone varataan (1-14)";
+			cout << "\nSyÃ¶tÃ¤ moneksiko yÃ¶ksi huone varataan (1-14)";
 			cout << "\n-------------------------------------------\n";
-			yomaara = nroInputCheck(1, 14, "Syötä 1-14");
+			yomaara = nroInputCheck(1, 14, "SyÃ¶tÃ¤ 1-14");
 			hinta = huoneet[huoneNro - 1].Hinta(yomaara);
 
 			int varausNro = 10000 + rand() % 100000; 	//arpoo ja tarkistaa varausnumeron
@@ -292,9 +258,9 @@ void varaaHuone(int huoneMaara, vector<Huone>& huoneet) // huoneen varaus funkti
 			}
 			cout << "\n-------------------------------------------------------------------------------------------------";
 			cout << "\nOvatko tiedot oikein? Kirjoita (1) jatkaaksesi tai (2) peruuttaksesi varauksen";
-			cout << "\nOlet syöttänyt: varaaja " << varaaja << ", huonenumero " << huoneNro << ", yomaara: " << yomaara;
+			cout << "\nOlet syÃ¶ttÃ¤nyt: varaaja " << varaaja << ", huonenumero " << huoneNro << ", yomaara: " << yomaara;
 			cout << "\n-------------------------------------------------------------------------------------------------\n";
-			varaa = nroInputCheck(1, 2, "Syötä 1 tai 2");
+			varaa = nroInputCheck(1, 2, "SyÃ¶tÃ¤ 1 tai 2");
 			if (varaa == 1)
 			{
 				huoneet[huoneNro - 1].varausnumero = varausNro;
@@ -304,7 +270,7 @@ void varaaHuone(int huoneMaara, vector<Huone>& huoneet) // huoneen varaus funkti
 				huoneet[huoneNro - 1].hinta = hinta;
 				//tulostaa huoneen tiedot
 				cout << "\n-----------------------------------------------------------------";
-				cout << "\nHuone " << huoneet[huoneNro - 1].huoneNro << " varattu nimellä " << huoneet[huoneNro - 1].varaaja << " varausnumerolla " << huoneet[huoneNro - 1].varausnumero << " ja hinnalla " << huoneet[huoneNro - 1].hinta;
+				cout << "\nHuone " << huoneet[huoneNro - 1].huoneNro << " varattu nimellÃ¤ " << huoneet[huoneNro - 1].varaaja << " varausnumerolla " << huoneet[huoneNro - 1].varausnumero << " ja hinnalla " << huoneet[huoneNro - 1].hinta;
 				cout << "\n-----------------------------------------------------------------";
 			}
 			else
@@ -323,30 +289,17 @@ void varaaHuone(int huoneMaara, vector<Huone>& huoneet) // huoneen varaus funkti
 			{
 				ranHuone = rand() % huoneet.size();
 			}
-			//Kysyy varaajan nimen ja kysyy oliko varaajan nimi oikein
-			do
-			{
-				cout << "\n------------------";
-				cout << "\nSyötä varaajan nimi: ";
-				cout << "\n------------------\n";
-				varaaja = stringCheck();
-				cout << "\n----------------------------------------------------------------";
-				cout << "\nSyötit: " << varaaja << ", Onko tämä oikein? Kyllä (1) Ei (2)";
-				cout << "\n----------------------------------------------------------------\n";
-				jatka = nroInputCheck(1, 2, "Syötä 1 tai 2");
-				if (jatka == 1) {
-					ok = true;
-				}
-				else {
-					ok = false;
-				}
 
-			} while (!ok);
+			cout << "\n--------------------";
+			cout << "\nSyÃ¶tÃ¤ varaajan nimi: ";
+			cout << "\n--------------------\n";
+			varaaja = stringCheck();
+
 
 			cout << "\n-------------------------------------------";
-			cout << "\nSyötä moneksiko yöksi huone varataan (1-14)";
+			cout << "\nSyÃ¶tÃ¤ moneksiko yÃ¶ksi huone varataan (1-14)";
 			cout << "\n-------------------------------------------\n";
-			yomaara = nroInputCheck(1, 14, "Syötä 1-14");
+			yomaara = nroInputCheck(1, 14, "SyÃ¶tÃ¤ 1-14");
 			hinta = huoneet[ranHuone].Hinta(yomaara);
 
 			int varausNro = 10000 + rand() % 100000; 			//arpoo ja tarkistaa varausnumeron
@@ -359,9 +312,9 @@ void varaaHuone(int huoneMaara, vector<Huone>& huoneet) // huoneen varaus funkti
 			}
 			cout << "\n------------------------------------------------------------------------------";
 			cout << "\nOvatko tiedot oikein? Kirjoita (1) jatkaaksesi tai (2) peruuttaksesi varauksen";
-			cout << "\nOlet syöttänyt: varaaja " << varaaja << ", yomaara: " << yomaara;
+			cout << "\nOlet syÃ¶ttÃ¤nyt: varaaja " << varaaja << ", yomaara: " << yomaara;
 			cout << "\n------------------------------------------------------------------------------\n";
-			varaa = nroInputCheck(1, 2, "Syötä 1 tai 2");
+			varaa = nroInputCheck(1, 2, "SyÃ¶tÃ¤ 1 tai 2");
 			if (varaa == 1)
 			{
 				huoneet[ranHuone].varaaja = varaaja;
@@ -370,7 +323,7 @@ void varaaHuone(int huoneMaara, vector<Huone>& huoneet) // huoneen varaus funkti
 				huoneet[ranHuone].varausnumero = varausNro;
 				huoneet[ranHuone].hinta = hinta;
 				cout << "\n-----------------------------------------------------------------";
-				cout << "\nHuone " << huoneet[ranHuone].huoneNro << " varattu nimellä " << huoneet[ranHuone].varaaja << " varausnumerolla " << huoneet[ranHuone].varausnumero << " ja hinnalla " << huoneet[ranHuone].hinta;
+				cout << "\nHuone " << huoneet[ranHuone].huoneNro << " varattu nimellÃ¤ " << huoneet[ranHuone].varaaja << " varausnumerolla " << huoneet[ranHuone].varausnumero << " ja hinnalla " << huoneet[ranHuone].hinta;
 				cout << "\n-----------------------------------------------------------------";
 			}
 			else
@@ -387,22 +340,22 @@ void nimiHaku(vector<Huone>& huoneet)
 {
 	string nimi;
 	cout << "\n----------------------";
-	cout << "\nSyötä varaajan nimi: ";
+	cout << "\nSyÃ¶tÃ¤ varaajan nimi: ";
 	cout << "\n----------------------\n";
 	nimi = stringCheck();
 
 	bool loydetty = false;
-	for (Huone huone : huoneet) //k?y l?pi huoneet ja etsii varaajan nimell?
+	for (Huone huone : huoneet) //kï¿½y lï¿½pi huoneet ja etsii varaajan nimellï¿½
 	{
 		if (huone.varaaja == nimi)
 		{
 			loydetty = true;
-			cout << "\nHuone löytyi nimellä: " << nimi << " Huoneen numero: " << huone.huoneNro << "  Varausnumero: " << huone.varausnumero;
+			cout << "\nHuone lÃ¶ytyi nimellÃ¤: " << nimi << " Huoneen numero: " << huone.huoneNro << "  Varausnumero: " << huone.varausnumero;
 		}
 	}
 	if (!loydetty)
 	{
-		cout << "\nTällä nimellä ei löytynyt varausta";
+		cout << "\nTÃ¤llÃ¤ nimellÃ¤ ei lÃ¶ytynyt varausta";
 	}
 }
 
@@ -411,77 +364,92 @@ void nroHaku(vector<Huone>& huoneet)
 	int varausNro;
 
 	cout << "\n---------------------------------";
-	cout << "\nSyötä varausnumero (10000-99999): ";
+	cout << "\nSyÃ¶tÃ¤ varausnumero (10000-99999): ";
 	cout << "\n---------------------------------\n";
-	varausNro = nroInputCheck(10000, 99999, "Syötä 10000-99999");
+	varausNro = nroInputCheck(10000, 99999, "SyÃ¶tÃ¤ 10000-99999");
 
 	bool loydetty = false;
-	for (Huone huone : huoneet) 	//k?y l?pi huoneet ja etsii varausnumerolla
+	for (Huone huone : huoneet) 	//kï¿½y lï¿½pi huoneet ja etsii varausnumerolla
 	{
 		if (huone.varausnumero == varausNro)
 		{
 			loydetty = true;
-			cout << "\nHuone löytyi! varausnumerolla " << varausNro << " Huoneen numero: " << huone.huoneNro << "Huoneen varaaja: " << huone.varaaja;
+			cout << "\nHuone lÃ¶ytyi! varausnumerolla " << varausNro << " Huoneen numero: " << huone.huoneNro << "Huoneen varaaja: " << huone.varaaja;
 		}
 	}
 	if (!loydetty)
 	{
-		cout << "\nTällä varausnumerolla ei löytynyt varausta\n";
+		cout << "\nTÃ¤llÃ¤ varausnumerolla ei lÃ¶ytynyt varausta\n";
+	}
+}
+void tulostaHuoneet(vector<Huone>& huoneet)
+{
+	for (Huone huone : huoneet)
+	{
+		cout << "\nHuone: " << huone.huoneNro << " Koko: " << huone.koko << " Varaaja: " << huone.varaaja << " Vaurausnumero: " << huone.varausnumero << " Hinta: " << huone.hinta;
 	}
 }
 
 int main()
 {
-	setlocale(LC_ALL, "FI_fi");		//??kk?set
+	setlocale(LC_ALL, "FI_fi");		//ï¿½ï¿½kkï¿½set
 	srand(time(0));		//random seed
 	int huoneMaara;
 	vector<Huone> huoneet;
 	ifstream inFile("C:/Temp/huoneet.txt");
 	if (inFile) 	//Jos tiedosto on olemassa niin lataa sen ja muuten luo uuden
 	{
-		cout << "Vanhat tiedot löytyi!";
+		cout << "Vanhat tiedot lÃ¶ytyi!";
 		Huone::loadData(inFile, huoneet);
 		inFile.close();
 	}
 	else
 	{
-		cout << "Vanhoja tietoja ei löytynyt :(";
+		cout << "Vanhoja tietoja ei lÃ¶ytynyt :(";
 		huoneMaara = 40 + 2 * (rand() % 131); 		//huoneMaara = random luku 40 + 2*0-130 eli 40-300
 		for (int i = 0; i < (huoneMaara / 2); i++) 		//puolet huoneista bool koko 1
 		{
-			huoneet.push_back(Huone(i + 1, 1));
+			huoneet.push_back(Huone(i + 1, 1, 100.0));
 
 		}
 		for (int i = (huoneMaara / 2); i < huoneMaara; i++) 	//puolet koko 2
 		{
-			huoneet.push_back(Huone(i + 1, 2));
+			huoneet.push_back(Huone(i + 1, 2, 150.0));
 		}
 	}
 	huoneMaara = huoneet.size();
 	bool poistu;
-	do			//tekee t?t? niin kauan kunnes k?ytt?j? haluaa poistua
+	int liike;
+	do			//tekee tï¿½tï¿½ niin kauan kunnes kï¿½yttï¿½jï¿½ haluaa poistua
 	{
 		poistu = false;
-		char liike = liikeInput();
-		if (liike == 'p')
+		cout << "\n-------------------------------------------------------------------------------------------------------------";
+		cout << "\nMitÃ¤ haluat tehdÃ¤? (1 varaa huone) (2 nimihaku) (3 nrohaku) (4 seuraava pÃ¤ivÃ¤) (5 tulosta huoneet) (6 poistu)";
+		cout << "\n-------------------------------------------------------------------------------------------------------------\n";
+		liike = nroInputCheck(1, 6, "SyÃ¶tÃ¤ luku vÃ¤liltÃ¤ 1-6");
+		if (liike == 6)
 		{
 			poistu = true;
 		}
-		else if (liike == 'v')
+		else if (liike == 1)
 		{
 			varaaHuone(huoneMaara, huoneet);
 		}
-		else if (liike == 'n')
+		else if (liike == 2)
 		{
 			nimiHaku(huoneet);
 		}
-		else if (liike == 'h')
+		else if (liike == 3)
 		{
 			nroHaku(huoneet);
 		}
-		else if (liike == 's')
+		else if (liike == 4)
 		{
 			uusiPaiva(huoneet);
+		}
+		else if (liike == 5)
+		{
+			tulostaHuoneet(huoneet);
 		}
 		else
 		{
@@ -499,7 +467,7 @@ int main()
 		}
 		outFile.close();
 	}
-	else cout << "\n!!!!!!!!!!!!!\n!!!\n!!!\n!!!!!!Tiedostojen tallentaminen epäonnistui!!!!!\n!!!\n!!!\n!!!!!!!!!!!!!\n";
+	else cout << "\n!!!!!!!!!!!!!\n!!!\n!!!\n!!!!!!Tiedostojen tallentaminen epÃ¤onnistui!!!!!\n!!!\n!!!\n!!!!!!!!!!!!!\n";
 	return 0;
 }
 
